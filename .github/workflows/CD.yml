@@ -1,0 +1,96 @@
+name: CD
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+env:
+  UPLOAD_BUILD: true
+
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     if: github.repository == 'OS-Q/ArduinoCore'
+#     strategy:
+#       fail-fast: true
+#       matrix:
+#         python: [3.7]
+#         examples:
+#           - "tests/blink"
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v2
+#         with:
+#           submodules: "recursive"
+#           fetch-depth: 1
+
+#       - name: Python ${{ matrix.python }}
+#         uses: actions/setup-python@v1
+#         with:
+#           python: ${{ matrix.python }}
+
+#       - name: Install
+#         run: |
+#           python -m pip install --upgrade pip
+#           pip install -U https://github.com/OS-Q/S03/archive/master.zip
+#           qio platform install https://github.com/OS-Q/P21.git
+
+#       - name: Build
+#         run: |
+#           qio run -d ${{ matrix.examples }}
+
+#   release:
+#     needs:
+#       - test
+#     if: success() && startsWith(github.ref, 'refs/tags/')
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Get source
+#         uses: actions/checkout@v2
+#         with:
+#           submodules: "recursive"
+#           fetch-depth: 1
+
+#       - name: Get version
+#         if: startsWith(github.ref, 'refs/tags/')
+#         id: get_version
+#         run: |
+#           echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+#       - name: Package
+#         if: success() && startsWith(github.ref, 'refs/tags/')
+#         run: |
+#           echo ${{ github.repository }} >> CHANGELOG.txt
+#           echo ${{ steps.get_version.outputs.VERSION }} >> CHANGELOG.txt
+#           echo ${{ github.sha }} >> CHANGELOG.txt
+#           echo $(date) >> CHANGELOG.txt
+#           tar -cjf A21A.tar.bz2 cores libraries variants system *.txt *.json
+
+#       - name: Release
+#         uses: stopstopstop/release-action@master
+#         if: startsWith(github.ref, 'refs/tags/')
+#         with:
+#           files: |
+#             CHANGELOG.txt
+#             A21A.tar.bz2
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.OSQ_REPO_TOKEN }}
+
+#       - name: Notification
+#         uses: stopstopstop/mail-action@master
+#         with:
+#           server_address:  smtp.gmail.com
+#           server_port: 465
+#           username: ${{secrets.MAIL_USERNAME}}
+#           password: ${{secrets.MAIL_PASSWORD}}
+#           subject: A21A Release
+#           body: file://CHANGELOG.txt
+#           to: ${{secrets.MAIL_TO}}
+#           from: Qitas
+#           cc: ${{secrets.MAIL_CC}},${{github.event.pusher.email}}
+#           bcc: ${{secrets.MAIL_BCC}}
+#           content_type: text/html
+#           convert_markdown: true
+#           attachments: package.json
+
